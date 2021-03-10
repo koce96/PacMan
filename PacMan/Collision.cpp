@@ -20,10 +20,10 @@ bool Collision::AABB(const SDL_Rect& recA, const SDL_Rect& recB) {
 	{return true;}
 
 	if (
-		recA.x <= 0 || recA.x + recA.w >= 800
+		recA.x <= 30 || recA.x + recA.w >= 770
 		) {return true;}
 	if (
-		recA.y <= 0 || recA.y + recA.h >= 610
+		recA.y <= 30 || recA.y + recA.h >= 610
 		) {return true;}
 	
 	return false;

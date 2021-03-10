@@ -59,12 +59,12 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
 
 	//newPlayer.addComponent<PositionComponent>();	
 	//newPlayer.getComponent<PositionComponent>().setPos(500, 500);
-	player.addComponent<PositionC>(384,320,32,32,2);
+	player.addComponent<PositionC>(384,384,32,32,1);
 	player.addComponent<SpriteC>("Assets/sprite1.png",3,150);
 	player.addComponent<Controls>();
 	player.addComponent<Collider>("player");
 
-	red.addComponent<PositionC>(300, 400, 32, 32, 2);
+	red.addComponent<PositionC>(384, 320, 32, 32, 1);
 	red.addComponent<SpriteC>("Assets/red.png", 2, 200);
 	red.addComponent<Collider>("red");
 
