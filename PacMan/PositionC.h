@@ -7,16 +7,16 @@ private:
 
 
 public:
-	int xpos;
-	int ypos;
-	int x() { return xpos; }
-	int y() { return ypos; }
+	double xpos;		//MIND THE DOUBLES
+	double ypos;
+	double x() { return xpos; }
+	double y() { return ypos; }
 	int direction;
-	int velocity;
+	double velocity;
 	int height = 32;
 	int width = 32;
 	int scale = 1;
-	int tempX, tempY;
+	double tempX, tempY;
 
 	PositionC() {
 		xpos = 0;
@@ -29,11 +29,11 @@ public:
 		scale = sc;
 	}
 
-	PositionC(int x, int y) {
+	PositionC(double x, double y) {
 		xpos = x;
 		ypos = y;
 	}
-	PositionC(int x, int y, int h, int w, int sc) {
+	PositionC(double x, double y, int h, int w, int sc) {
 		xpos = x;
 		ypos = y;
 		height = h;
@@ -68,7 +68,7 @@ public:
 		//ypos--;
 		//cout << xpos << " " << ypos << endl;
 		//cout << velocity << endl;
-		velocity = 1;
+		velocity = 0.5;
 	}
 
 	void setPos(int x, int y) {
@@ -76,11 +76,11 @@ public:
 		ypos = y;*/
 	}
 
-	void x(int x) {
+	void x(double x) {
 	/*	xpos = x;*/
 	}
 
-	void y(int y) {
+	void y(double y) {
 	/*	ypos = y;*/
 	}
 

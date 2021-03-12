@@ -1,6 +1,13 @@
 #include "Map.h"
 #include "Game.h"
 #include "Collision.h"
+#include "Entities.h"
+#include "Components.h"
+#include <vector>
+
+using namespace std;
+
+extern Manager manager;
 
 int level[20][25] = {
 { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 },
@@ -51,9 +58,17 @@ void Map::loadMap(int arr[20][25]) {
 	for (int row = 0; row < 20; row++) {
 		for (int column = 0; column < 25; column++) {
 			map[row][column] = arr[row][column];
+			if (map[row][column] == 1 || map[row][column] == 2) {
+							auto& tcol(manager.addEntity());
+							tcol.addComponent<Collider>("terrain", column * 32, row * 32, 32);
+							whyt.push_back(tcol.getComponent<Collider>());
+							cout << whyt.size() << endl;
+			}
 		}
+		
 	}
-}
+} 
+
 
 void Map::drawMap() {
 	int type = 0;
@@ -70,10 +85,7 @@ void Map::drawMap() {
 				Game::Draw(space, src, dest);
 				break;
 			case 1:
-				Game::Draw(walls, src, dest);
-				/*auto& tcol(manager.addEntity());
-				tcol.addComponent<ColliderComponent>("terrain", x * scaledSize, y * scaledSize, scaledSize);
-				tcol.addGroup(Game::groupColliders);*/
+			Game::Draw(walls, src, dest);
 				break;
 			case 2:
 				Game::Draw(gate, src, dest);
@@ -83,4 +95,5 @@ void Map::drawMap() {
 			}
 		}
 	}
+
 }

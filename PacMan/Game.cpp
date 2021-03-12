@@ -108,13 +108,27 @@ void Game::update()
 		player.getComponent<PositionC>().collided();
 		//player.getComponent<PositionC>().velocity * -1;
 	}
-	cout << player.getComponent<PositionC>().velocity << endl;
+	//cout << player.getComponent<PositionC>().velocity << endl;
 	if (Collision::AABB(player.getComponent<Collider>().collider,
 		red.getComponent<Collider>().collider)) {
 		cout << "Hit!!" << endl;
 		red.getComponent<SpriteC>().setTex("Assets/ghost.png");
 		//player.getComponent<PositionC>().velocity * -1;
 	}
+	//cout << whyt.size();
+	//whyt.push_back(player.getComponent<Collider>());
+
+	for (size_t x = 0; x < map->whyt.size(); x++) {
+		if (Collision::AABB(player.getComponent<Collider>().collider,
+			map->whyt[x].collider)) {
+			cout << "Hit";
+			player.getComponent<PositionC>().collided();
+		}
+		//cout << map->whyt[1].collider.w << map->whyt[1].collider.h << endl;
+	}
+	/*for (int a = 0; a < map->whyt.size(); a++) {
+		cout << map->whyt[a].collider.x/32 << "," << map->whyt[a].collider.y/32 << endl;
+	}*/
 }
 
 void Game::render()
