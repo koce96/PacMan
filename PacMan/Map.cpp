@@ -11,7 +11,7 @@ extern Manager manager;
 
 int level[20][25] = {
 { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 },
-{ 1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1 },
+{ 1,4,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,4,1 },
 { 1,0,1,1,1,1,0,1,1,1,1,0,1,0,1,1,1,1,0,1,1,1,1,0,1 },
 { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 },
 { 1,0,1,1,1,1,0,1,0,1,1,1,1,1,1,1,0,1,0,1,1,1,1,0,1 },
@@ -19,16 +19,16 @@ int level[20][25] = {
 { 1,0,1,1,0,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,0,1,1,0,1 },
 { 1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,1 },
 { 1,1,1,1,0,1,0,1,0,1,1,2,2,2,1,1,0,1,0,1,0,1,1,1,1 },
-{ 1,1,1,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,1,1,1 },
-{ 1,1,1,1,0,1,0,1,0,1,0,0,0,0,0,1,0,1,0,1,0,1,1,1,1 },
+{ 1,1,1,1,0,0,0,0,0,1,3,3,3,3,3,1,0,0,0,0,0,1,1,1,1 },
+{ 1,1,1,1,0,1,0,1,0,1,3,3,3,3,3,1,0,1,0,1,0,1,1,1,1 },
 { 1,1,1,1,0,1,0,1,0,1,1,1,1,1,1,1,0,1,0,1,0,1,1,1,1 },
-{ 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 },
+{ 1,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,1 },
 { 1,0,1,1,1,1,0,1,0,1,1,1,1,1,1,1,0,1,0,1,1,1,1,0,1 },
 { 1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1 },
 { 1,1,1,0,1,1,0,1,0,1,1,1,1,1,1,1,0,1,0,1,1,0,1,1,1 },
 { 1,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1 },
 { 1,0,1,1,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,1,1,0,1 },
-{ 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 },
+{ 1,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,1 },
 { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 }
 };
 
@@ -37,6 +37,8 @@ Map::Map()
 	space = Game::loadTexture("Assets/space.png");
 	walls = Game::loadTexture("Assets/wall.png");
 	gate = Game::loadTexture("Assets/gate.png");
+	dots = Game::loadTexture("Assets/point.png");
+	pills = Game::loadTexture("Assets/pill.png");
 
 
 	loadMap(level);
@@ -52,6 +54,7 @@ Map::~Map() {
 	SDL_DestroyTexture(walls);
 	SDL_DestroyTexture(gate);
 	SDL_DestroyTexture(space);
+	SDL_DestroyTexture(dots);
 }
 
 void Map::loadMap(int arr[20][25]) {
@@ -59,16 +62,21 @@ void Map::loadMap(int arr[20][25]) {
 		for (int column = 0; column < 25; column++) {
 			map[row][column] = arr[row][column];
 			if (map[row][column] == 1 || map[row][column] == 2) {
-							auto& tcol(manager.addEntity());
-							tcol.addComponent<Collider>("terrain", column * 32, row * 32, 32);
-							whyt.push_back(tcol.getComponent<Collider>());
-							cout << whyt.size() << endl;
+							auto& colW(manager.addEntity());
+							colW.addComponent<Collider>("walls", column * 32, row * 32, 32);
+							wallsV.push_back(colW.getComponent<Collider>());
+							cout << wallsV.size() << endl;
+			}
+			else if (map[row][column] == 0 || map[row][column] == 4) {
+				auto& colD(manager.addEntity());
+				colD.addComponent<Collider>("dots", column * 32, row * 32, 32);
+				dotsV.push_back(colD.getComponent<Collider>());
+				cout << dotsV.size() << endl;
 			}
 		}
 		
 	}
 } 
-
 
 void Map::drawMap() {
 	int type = 0;
@@ -82,7 +90,7 @@ void Map::drawMap() {
 			switch (type)
 			{
 			case 0:
-				Game::Draw(space, src, dest);
+				Game::Draw(dots, src, dest);
 				break;
 			case 1:
 			Game::Draw(walls, src, dest);
@@ -90,10 +98,19 @@ void Map::drawMap() {
 			case 2:
 				Game::Draw(gate, src, dest);
 				break;
+			case 3:
+				Game::Draw(space, src, dest);
+				break;
+			case 4:
+				Game::Draw(pills, src, dest);
+				break;
 					default:
 				break;
 			}
 		}
 	}
+}
 
+void Map::change(int pos1,int pos2) {
+	map[pos2][pos1] = 3;
 }

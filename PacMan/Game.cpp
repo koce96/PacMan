@@ -2,6 +2,8 @@
 #include "Map.h"
 #include "Components.h"
 #include "Collision.h"
+#include "Ghost.h"
+
 //#include "Entities.h"
 //#include "GameObject.h"
 
@@ -9,12 +11,16 @@ SDL_Event Game::event;
 Map* map;
 SDL_Renderer* Game::renderer = nullptr;
 Manager manager;
+//Ghost* ghost;
 
 //GameObject* player;
 
 auto& player(manager.addEntity());
 auto& red(manager.addEntity());
-auto& wall(manager.addEntity());
+auto& green(manager.addEntity());
+auto& blue(manager.addEntity());
+auto& orange(manager.addEntity());
+//auto& wall(manager.addEntity());
 
 Game::Game()
 {
@@ -64,18 +70,30 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
 	player.addComponent<Controls>();
 	player.addComponent<Collider>("player");
 
-	red.addComponent<PositionC>(384, 320, 32, 32, 1);
-	red.addComponent<SpriteC>("Assets/red.png", 2, 200);
+	red.addComponent<PositionC>(384, 288, 32, 32, 1);
+	red.addComponent<SpriteC>("Assets/red.png", 8, 400);
 	red.addComponent<Collider>("red");
+
+	blue.addComponent<PositionC>(352, 320, 32, 32, 1);
+	blue.addComponent<SpriteC>("Assets/blue.png", 8, 400);
+	blue.addComponent<Collider>("blue");
+
+	orange.addComponent<PositionC>(416, 320, 32, 32, 1);
+	orange.addComponent<SpriteC>("Assets/orange.png", 8, 400);
+	orange.addComponent<Collider>("orange");
+
+	green.addComponent<PositionC>(384, 320, 32, 32, 1);
+	green.addComponent<SpriteC>("Assets/green.png", 8, 400);
+	green.addComponent<Collider>("green");
 
 	/*wall.addComponent<PositionC>(0, 0, 32, 800, 1);
 	wall.addComponent<SpriteC>("Assets/gate.png");
 	wall.addComponent<Collider>("wall");
 */
-	wall.addComponent<PositionC>(96, 96, 32, 32, 1);
-	wall.addComponent<PositionC>(128, 128, 32, 32, 1);
-	wall.addComponent<SpriteC>("Assets/gate.png");
-	wall.addComponent<Collider>("wall");
+	//wall.addComponent<PositionC>(96, 96, 32, 32, 1);
+	//wall.addComponent<PositionC>(128, 128, 32, 32, 1);
+	//wall.addComponent<SpriteC>("Assets/gate.png");
+	//wall.addComponent<Collider>("wall");
 }
 
 void Game::handleEvents()
@@ -102,33 +120,55 @@ void Game::update()
 	//	player.getComponent<SpriteC>().setTex("Assets/logo.png");
 	//}
 	
-	if (Collision::AABB(player.getComponent<Collider>().collider,
-		wall.getComponent<Collider>().collider)) {
-		cout << "Hit!!" << endl;
-		player.getComponent<PositionC>().collided();
-		//player.getComponent<PositionC>().velocity * -1;
-	}
+	//if (Collision::AABB(player.getComponent<Collider>().collider,
+	//	wall.getComponent<Collider>().collider)) {
+	//	//cout << "Hit!!" << endl;
+	//	player.getComponent<PositionC>().collided();
+	//	//player.getComponent<PositionC>().velocity * -1;
+	//}
 	//cout << player.getComponent<PositionC>().velocity << endl;
-	if (Collision::AABB(player.getComponent<Collider>().collider,
-		red.getComponent<Collider>().collider)) {
-		cout << "Hit!!" << endl;
-		red.getComponent<SpriteC>().setTex("Assets/ghost.png");
+
+	if (Collision::ATE(player.getComponent<Collider>().collider,
+		red.getComponent<Collider>().collider,5)) {
+		//red.getComponent<SpriteC>().setTex("Assets/ghost.png");
 		//player.getComponent<PositionC>().velocity * -1;
 	}
-	//cout << whyt.size();
-	//whyt.push_back(player.getComponent<Collider>());
 
-	for (size_t x = 0; x < map->whyt.size(); x++) {
+	for (size_t x = 0; x < map->wallsV.size(); x++) {
 		if (Collision::AABB(player.getComponent<Collider>().collider,
-			map->whyt[x].collider)) {
-			cout << "Hit";
+			map->wallsV[x].collider)) {
 			player.getComponent<PositionC>().collided();
 		}
-		//cout << map->whyt[1].collider.w << map->whyt[1].collider.h << endl;
 	}
-	/*for (int a = 0; a < map->whyt.size(); a++) {
-		cout << map->whyt[a].collider.x/32 << "," << map->whyt[a].collider.y/32 << endl;
-	}*/
+	for (size_t a = 0; a < map->dotsV.size(); a++) {
+		if (Collision::ATE(player.getComponent<Collider>().collider,
+			map->dotsV[a].collider,20) && map->dotsV[a].tag == "dots") {
+			map->dotsV[a].tag = "space";
+			map->change(map->dotsV[a].collider.x /32, map->dotsV[a].collider.y /32);
+			map->dotsV[a].newText(map->dotsV[a].collider.y, map->dotsV[a].collider.x);
+		}
+	}
+
+	//Ghost::moveGhost(player.getComponent<PositionC>().xpos, player.getComponent<PositionC>().ypos,
+		//red.getComponent<PositionC>().xpos, red.getComponent<PositionC>().ypos);
+
+	if (player.getComponent<PositionC>().xpos > red.getComponent<PositionC>().xpos) {
+		red.getComponent<PositionC>().xpos += 0.2;
+		//return true;
+	}
+	if (player.getComponent<PositionC>().xpos < red.getComponent<PositionC>().xpos) {
+		red.getComponent<PositionC>().xpos -= 0.2;
+		//return true;
+	}
+	if (player.getComponent<PositionC>().ypos > red.getComponent<PositionC>().ypos) {
+		red.getComponent<PositionC>().ypos += 0.2;
+		//return true;
+	}
+	if (player.getComponent<PositionC>().ypos < red.getComponent<PositionC>().ypos) {
+		red.getComponent<PositionC>().ypos -= 0.2;
+		//return true;
+	}
+
 }
 
 void Game::render()

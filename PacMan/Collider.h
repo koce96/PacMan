@@ -7,8 +7,9 @@ using namespace std;
 
 class Collider : public Component {
 public:
-	SDL_Rect collider;
+	SDL_Rect collider, src, dest;
 	string tag;
+	SDL_Texture* eaten = Game::loadTexture("Assets/space.png");
 
 	PositionC* position;
 
@@ -36,5 +37,14 @@ public:
 		collider.y = position->ypos;
 		collider.w = position->width * position->scale;
 		collider.h = position->height * position->scale;
+	}
+
+	void newText(int destx, int desty) {
+		src.h = dest.h = 32;
+		src.w = dest.w = 32;
+		src.x = src.y = 0;
+		dest.x = destx;
+		dest.y = desty;
+		SDL_RenderCopy(Game::renderer, eaten, &src, &dest);
 	}
 };

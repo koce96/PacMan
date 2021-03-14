@@ -96,4 +96,5 @@ public:
 		tempX = xpos;
 		tempY = ypos;
 	}
+
 };

@@ -18,7 +18,9 @@ public:
 	
 	void loadMap(int arr[20][25]);
 	void drawMap();
-	vector<Collider> whyt;
+	void change(int pos1,int pos2);
+	vector<Collider> wallsV;
+	vector<Collider> dotsV;
 
 private:
 	SDL_Rect src, dest;
@@ -26,6 +28,8 @@ private:
 	SDL_Texture* space;
 	SDL_Texture* walls;
 	SDL_Texture* gate;
+	SDL_Texture* dots;
+	SDL_Texture* pills;
 
 	int map[20][25];
 };
