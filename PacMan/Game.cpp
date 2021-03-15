@@ -20,7 +20,9 @@ auto& red(manager.addEntity());
 auto& green(manager.addEntity());
 auto& blue(manager.addEntity());
 auto& orange(manager.addEntity());
-//auto& wall(manager.addEntity());
+
+double velX = 0.5;
+double velY = 0;
 
 Game::Game()
 {
@@ -70,7 +72,7 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
 	player.addComponent<Controls>();
 	player.addComponent<Collider>("player");
 
-	red.addComponent<PositionC>(384, 288, 32, 32, 1);
+	red.addComponent<PositionC>(384, 224, 32, 32, 1);
 	red.addComponent<SpriteC>("Assets/red.png", 8, 400);
 	red.addComponent<Collider>("red");
 
@@ -85,15 +87,6 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
 	green.addComponent<PositionC>(384, 320, 32, 32, 1);
 	green.addComponent<SpriteC>("Assets/green.png", 8, 400);
 	green.addComponent<Collider>("green");
-
-	/*wall.addComponent<PositionC>(0, 0, 32, 800, 1);
-	wall.addComponent<SpriteC>("Assets/gate.png");
-	wall.addComponent<Collider>("wall");
-*/
-	//wall.addComponent<PositionC>(96, 96, 32, 32, 1);
-	//wall.addComponent<PositionC>(128, 128, 32, 32, 1);
-	//wall.addComponent<SpriteC>("Assets/gate.png");
-	//wall.addComponent<Collider>("wall");
 }
 
 void Game::handleEvents()
@@ -112,6 +105,7 @@ void Game::update()
 {	
 	//player->update();
 	player.getComponent<PositionC>().saveXY();
+	red.getComponent<PositionC>().saveXY();
 	manager.refresh();
 	manager.update();
 	//cout << newPlayer.getComponent<PositionComponent>().x() << "," << newPlayer.getComponent<PositionComponent>().y() << endl;
@@ -148,26 +142,139 @@ void Game::update()
 			map->dotsV[a].newText(map->dotsV[a].collider.y, map->dotsV[a].collider.x);
 		}
 	}
+	//for (size_t x = 0; x < map->wallsV.size(); x++) {
+	//	if (red.getComponent<Collider>().collider.y - 32 ==
+	//		map->wallsV[x].collider.y) {
+	//		red.getComponent<PositionC>().xpos += 0.1;
+	//		cout << "1";
+	//	}
+	//	else if (red.getComponent<Collider>().collider.x - 32 ==
+	//		map->wallsV[x].collider.x) {
+	//		red.getComponent<PositionC>().ypos = 0;
+	//	}/*
+	/*	else if (red.getComponent<Collider>().collider.y + 32 ==
+			map->wallsV[x].collider.y) {
+			red.getComponent<PositionC>().xpos -= 0.1;
+		}
+		else if (red.getComponent<Collider>().collider.x + 32 ==
+			map->wallsV[x].collider.x) {
+			red.getComponent<PositionC>().ypos += 0.1;
+		}*/
+		/*else { red.getComponent<PositionC>().xpos -= 0.01;
+		cout << "2";
+		}*/
+
+	red.getComponent<PositionC>().xpos += velX;
+	red.getComponent<PositionC>().ypos += velY;
+	int set = 0;
+	for (size_t x = 0; x < map->wallsV.size(); x++) {
+			if (Collision::ATE(red.getComponent<Collider>().collider, map->wallsV[x].collider,5) && velX == 0.5	//right ppy>epy
+				&& player.getComponent<PositionC>().ypos > red.getComponent<PositionC>().ypos) {
+				red.getComponent<PositionC>().collided();
+				red.getComponent<PositionC>().xpos += -5;
+				velX = 0;
+				velY = 0.5;
+			}
+		else if (Collision::ATE(red.getComponent<Collider>().collider, map->wallsV[x].collider, 5) && velX == 0.5	//right ppy<epy
+					&& player.getComponent<PositionC>().ypos < red.getComponent<PositionC>().ypos) {
+					red.getComponent<PositionC>().collided();
+					red.getComponent<PositionC>().xpos += -5;
+					velX = 0;
+					velY = -0.5;
+			 }
+		else if (Collision::ATE(red.getComponent<Collider>().collider, map->wallsV[x].collider, 5) && velX == -0.5	//left ppy>epy
+				&& player.getComponent<PositionC>().ypos > red.getComponent<PositionC>().ypos) {
+				red.getComponent<PositionC>().collided();
+				red.getComponent<PositionC>().xpos += 5;
+				velX = 0;
+				velY = 0.5;
+			 }
+		else if (Collision::ATE(red.getComponent<Collider>().collider, map->wallsV[x].collider, 5) && velX == -0.5	//left ppy<epy
+				&& player.getComponent<PositionC>().ypos < red.getComponent<PositionC>().ypos) {
+				red.getComponent<PositionC>().collided();
+				red.getComponent<PositionC>().xpos += 5;
+				velX = 0;
+				velY = -0.5;
+				if (red.getComponent<PositionC>().ypos - 32 == map->wallsV[197].collider.y) {
+					velY = 0.5;
+				}
+			 }
+		else if (Collision::ATE(red.getComponent<Collider>().collider, map->wallsV[x].collider, 5) && velY == 0.5		//down ppx>epx
+				&& player.getComponent<PositionC>().xpos > red.getComponent<PositionC>().xpos) {
+				red.getComponent<PositionC>().collided();
+				red.getComponent<PositionC>().ypos += -5;
+				velX = 0.5;
+				velY = 0;
+			 }
+		else if (Collision::ATE(red.getComponent<Collider>().collider, map->wallsV[x].collider, 5) && velY == 0.5		//down ppx<epx
+				&& player.getComponent<PositionC>().xpos < red.getComponent<PositionC>().xpos) {
+				red.getComponent<PositionC>().collided();
+				red.getComponent<PositionC>().ypos += -5;
+				velX = -0.5;
+				velY = 0;
+			 }
+		else if (Collision::ATE(red.getComponent<Collider>().collider, map->wallsV[x].collider, 5) && velY == -0.5	//up ppx>epx
+				&& player.getComponent<PositionC>().xpos > red.getComponent<PositionC>().xpos) {
+				red.getComponent<PositionC>().collided();
+				red.getComponent<PositionC>().ypos += 5;
+				velX = 0.5;
+				velY = 0;
+			 }
+		else if (Collision::ATE(red.getComponent<Collider>().collider, map->wallsV[x].collider, 5) && velY == -0.5	//up ppx<epx
+				&& player.getComponent<PositionC>().xpos < red.getComponent<PositionC>().xpos) {
+				red.getComponent<PositionC>().collided();
+				red.getComponent<PositionC>().ypos += 5;
+				velX = -0.5;
+				velY = 0;
+			 }
+			//cout << x  << " " << map->wallsV[x].collider.x /32 << " " <<  map->wallsV[x].collider.y /32 << endl;
+	}
+
+	for (int x = 0; x < map->intV.size(); x++) {
+		if (red.getComponent<Collider>().collider.x == map->intV[x].collider.x && red.getComponent<Collider>().collider.y == map->intV[x].collider.y) {
+			if (player.getComponent<PositionC>().xpos > red.getComponent<PositionC>().xpos
+				&& player.getComponent<PositionC>().ypos > red.getComponent<PositionC>().ypos) {
+				velX = 0.5;
+				velY = 0;
+			}
+			else if (player.getComponent<PositionC>().xpos > red.getComponent<PositionC>().xpos
+				&& player.getComponent<PositionC>().ypos < red.getComponent<PositionC>().ypos) {
+				velX = -0.5;
+				velY = 0;
+			}
+			else if (player.getComponent<PositionC>().ypos < red.getComponent<PositionC>().ypos
+				&& player.getComponent<PositionC>().ypos < red.getComponent<PositionC>().ypos) {
+				velX = 0;
+				velY = 0.5;
+			}
+			else if (player.getComponent<PositionC>().ypos < red.getComponent<PositionC>().ypos
+				&& player.getComponent<PositionC>().ypos > red.getComponent<PositionC>().ypos) {
+				velX = 0;
+				velY = -0.5;
+			}
+		}
+	}
+
 
 	//Ghost::moveGhost(player.getComponent<PositionC>().xpos, player.getComponent<PositionC>().ypos,
 		//red.getComponent<PositionC>().xpos, red.getComponent<PositionC>().ypos);
 
-	if (player.getComponent<PositionC>().xpos > red.getComponent<PositionC>().xpos) {
-		red.getComponent<PositionC>().xpos += 0.2;
-		//return true;
-	}
-	if (player.getComponent<PositionC>().xpos < red.getComponent<PositionC>().xpos) {
-		red.getComponent<PositionC>().xpos -= 0.2;
-		//return true;
-	}
-	if (player.getComponent<PositionC>().ypos > red.getComponent<PositionC>().ypos) {
-		red.getComponent<PositionC>().ypos += 0.2;
-		//return true;
-	}
-	if (player.getComponent<PositionC>().ypos < red.getComponent<PositionC>().ypos) {
-		red.getComponent<PositionC>().ypos -= 0.2;
-		//return true;
-	}
+	//if (player.getComponent<PositionC>().xpos > red.getComponent<PositionC>().xpos) {
+	//	red.getComponent<PositionC>().xpos += 0.2;
+	//	//return true;
+	//}
+	//if (player.getComponent<PositionC>().xpos < red.getComponent<PositionC>().xpos) {
+	//	red.getComponent<PositionC>().xpos -= 0.2;
+	//	//return true;
+	//}
+	//if (player.getComponent<PositionC>().ypos > red.getComponent<PositionC>().ypos) {
+	//	red.getComponent<PositionC>().ypos += 0.2;
+	//	//return true;
+	//}
+	//if (player.getComponent<PositionC>().ypos < red.getComponent<PositionC>().ypos) {
+	//	red.getComponent<PositionC>().ypos -= 0.2;
+	//	//return true;
+	//}
 
 }
 

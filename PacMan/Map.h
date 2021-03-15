@@ -21,6 +21,7 @@ public:
 	void change(int pos1,int pos2);
 	vector<Collider> wallsV;
 	vector<Collider> dotsV;
+	vector<Collider> intV;
 
 private:
 	SDL_Rect src, dest;

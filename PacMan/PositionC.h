@@ -39,6 +39,8 @@ public:
 		height = h;
 		width = w;
 		scale = sc;
+		tempX;
+		tempY;
 	}
 
 	void init() override {
