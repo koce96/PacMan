@@ -2,27 +2,21 @@
 #include "Map.h"
 #include "Components.h"
 #include "Collision.h"
-#include "Ghost.h"
-
-//#include "Entities.h"
-//#include "GameObject.h"
+#include <ctime>
+#include "Text.h"
+#include "Enemy.h"
+#include "Player.h"
 
 SDL_Event Game::event;
 Map* map;
 SDL_Renderer* Game::renderer = nullptr;
 Manager manager;
-//Ghost* ghost;
 
-//GameObject* player;
-
-auto& player(manager.addEntity());
+auto& pacman(manager.addEntity());
 auto& red(manager.addEntity());
 auto& green(manager.addEntity());
 auto& blue(manager.addEntity());
 auto& orange(manager.addEntity());
-
-double velX = 0.5;
-double velY = 0;
 
 Game::Game()
 {
@@ -51,42 +45,44 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
 			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 			cout << "Renderer Created!" << endl;
 		}
-
 		isRunning = true;
-	} //else {
-	//isRunning = false;
-	//}
+	} 
 
-	
+	if (TTF_Init() == -1) {
+			cout << "Failed to init ttf!" << endl;
+	}
 
-	//SDL_Surface* tempSurface = IMG_Load("Assets/pacman.png");
-	//playerTexture = SDL_CreateTextureFromSurface(renderer, tempSurface);
-	//SDL_FreeSurface(tempSurface);
-	//player = new GameObject("Assets/gate.png", 0, 0);
-		map = new Map();
+	map = new Map();
 
-	//newPlayer.addComponent<PositionComponent>();	
-	//newPlayer.getComponent<PositionComponent>().setPos(500, 500);
-	player.addComponent<PositionC>(384,384,32,32,1);
-	player.addComponent<SpriteC>("Assets/sprite1.png",3,150);
-	player.addComponent<Controls>();
-	player.addComponent<Collider>("player");
+	pacman.addComponent<PositionC>(384,384,32,32,1);
+	pacman.addComponent<SpriteC>("Assets/pacman.png",3,140);
+	pacman.addComponent<Controls>();
+	pacman.addComponent<Collider>("pacman");
+	pacman.addComponent<Player>();
 
 	red.addComponent<PositionC>(384, 224, 32, 32, 1);
 	red.addComponent<SpriteC>("Assets/red.png", 8, 400);
 	red.addComponent<Collider>("red");
+	red.addComponent<Enemy>();
 
 	blue.addComponent<PositionC>(352, 320, 32, 32, 1);
 	blue.addComponent<SpriteC>("Assets/blue.png", 8, 400);
 	blue.addComponent<Collider>("blue");
+	blue.addComponent<Enemy>();
+	blue.getComponent<Enemy>().setVel(0, 0);
 
 	orange.addComponent<PositionC>(416, 320, 32, 32, 1);
 	orange.addComponent<SpriteC>("Assets/orange.png", 8, 400);
 	orange.addComponent<Collider>("orange");
+	orange.addComponent<Enemy>();
+	orange.getComponent<Enemy>().setVel(0, 0);
 
 	green.addComponent<PositionC>(384, 320, 32, 32, 1);
 	green.addComponent<SpriteC>("Assets/green.png", 8, 400);
 	green.addComponent<Collider>("green");
+	green.addComponent<Enemy>();
+	green.getComponent<Enemy>().setVel(0, 0);
+
 }
 
 void Game::handleEvents()
@@ -102,180 +98,103 @@ void Game::handleEvents()
 }
 
 void Game::update() 
-{	
-	//player->update();
-	player.getComponent<PositionC>().saveXY();
+{
+	pacman.getComponent<PositionC>().saveXY();
 	red.getComponent<PositionC>().saveXY();
+	blue.getComponent<PositionC>().saveXY();
+	green.getComponent<PositionC>().saveXY();
+	orange.getComponent<PositionC>().saveXY();
 	manager.refresh();
 	manager.update();
-	//cout << newPlayer.getComponent<PositionComponent>().x() << "," << newPlayer.getComponent<PositionComponent>().y() << endl;
 
-	//if (player.getComponent<PositionC>().x() > 100) {
-	//	player.getComponent<SpriteC>().setTex("Assets/logo.png");
-	//}
-	
-	//if (Collision::AABB(player.getComponent<Collider>().collider,
-	//	wall.getComponent<Collider>().collider)) {
-	//	//cout << "Hit!!" << endl;
-	//	player.getComponent<PositionC>().collided();
-	//	//player.getComponent<PositionC>().velocity * -1;
-	//}
-	//cout << player.getComponent<PositionC>().velocity << endl;
+	pacman.getComponent<Player>().enemyCol(red);
+	pacman.getComponent<Player>().enemyCol(blue);
+	pacman.getComponent<Player>().enemyCol(orange);
+	pacman.getComponent<Player>().enemyCol(green);
 
-	if (Collision::ATE(player.getComponent<Collider>().collider,
-		red.getComponent<Collider>().collider,5)) {
-		//red.getComponent<SpriteC>().setTex("Assets/ghost.png");
-		//player.getComponent<PositionC>().velocity * -1;
-	}
-
-	for (size_t x = 0; x < map->wallsV.size(); x++) {
-		if (Collision::AABB(player.getComponent<Collider>().collider,
-			map->wallsV[x].collider)) {
-			player.getComponent<PositionC>().collided();
-		}
-	}
 	for (size_t a = 0; a < map->dotsV.size(); a++) {
-		if (Collision::ATE(player.getComponent<Collider>().collider,
-			map->dotsV[a].collider,20) && map->dotsV[a].tag == "dots") {
+		if (Collision::ATE(pacman.getComponent<Collider>().collider,
+			map->dotsV[a].collider,20) && map->dotsV[a].tag == "dots" || Collision::ATE(pacman.getComponent<Collider>().collider,
+				map->dotsV[a].collider, 20) && map->dotsV[a].tag == "pills") {
+			if (map->dotsV[a].tag == "pills") {
+				if (red.getComponent<Enemy>().wandering == false) {
+					red.getComponent<Enemy>().scared = true;
+				}
+				if (blue.getComponent<Enemy>().wandering == false) {
+					blue.getComponent<Enemy>().scared = true;
+				}
+				if (orange.getComponent<Enemy>().wandering == false) {
+					orange.getComponent<Enemy>().scared = true;
+				}
+				if (green.getComponent<Enemy>().wandering == false) {
+					green.getComponent<Enemy>().scared = true;
+				}
+			}
 			map->dotsV[a].tag = "space";
 			map->change(map->dotsV[a].collider.x /32, map->dotsV[a].collider.y /32);
 			map->dotsV[a].newText(map->dotsV[a].collider.y, map->dotsV[a].collider.x);
+			points += 10;
+			point = to_string(points);
 		}
 	}
-	//for (size_t x = 0; x < map->wallsV.size(); x++) {
-	//	if (red.getComponent<Collider>().collider.y - 32 ==
-	//		map->wallsV[x].collider.y) {
-	//		red.getComponent<PositionC>().xpos += 0.1;
-	//		cout << "1";
-	//	}
-	//	else if (red.getComponent<Collider>().collider.x - 32 ==
-	//		map->wallsV[x].collider.x) {
-	//		red.getComponent<PositionC>().ypos = 0;
-	//	}/*
-	/*	else if (red.getComponent<Collider>().collider.y + 32 ==
-			map->wallsV[x].collider.y) {
-			red.getComponent<PositionC>().xpos -= 0.1;
-		}
-		else if (red.getComponent<Collider>().collider.x + 32 ==
-			map->wallsV[x].collider.x) {
-			red.getComponent<PositionC>().ypos += 0.1;
-		}*/
-		/*else { red.getComponent<PositionC>().xpos -= 0.01;
-		cout << "2";
-		}*/
-
-	red.getComponent<PositionC>().xpos += velX;
-	red.getComponent<PositionC>().ypos += velY;
-	int set = 0;
-	for (size_t x = 0; x < map->wallsV.size(); x++) {
-			if (Collision::ATE(red.getComponent<Collider>().collider, map->wallsV[x].collider,5) && velX == 0.5	//right ppy>epy
-				&& player.getComponent<PositionC>().ypos > red.getComponent<PositionC>().ypos) {
-				red.getComponent<PositionC>().collided();
-				red.getComponent<PositionC>().xpos += -5;
-				velX = 0;
-				velY = 0.5;
-			}
-		else if (Collision::ATE(red.getComponent<Collider>().collider, map->wallsV[x].collider, 5) && velX == 0.5	//right ppy<epy
-					&& player.getComponent<PositionC>().ypos < red.getComponent<PositionC>().ypos) {
-					red.getComponent<PositionC>().collided();
-					red.getComponent<PositionC>().xpos += -5;
-					velX = 0;
-					velY = -0.5;
-			 }
-		else if (Collision::ATE(red.getComponent<Collider>().collider, map->wallsV[x].collider, 5) && velX == -0.5	//left ppy>epy
-				&& player.getComponent<PositionC>().ypos > red.getComponent<PositionC>().ypos) {
-				red.getComponent<PositionC>().collided();
-				red.getComponent<PositionC>().xpos += 5;
-				velX = 0;
-				velY = 0.5;
-			 }
-		else if (Collision::ATE(red.getComponent<Collider>().collider, map->wallsV[x].collider, 5) && velX == -0.5	//left ppy<epy
-				&& player.getComponent<PositionC>().ypos < red.getComponent<PositionC>().ypos) {
-				red.getComponent<PositionC>().collided();
-				red.getComponent<PositionC>().xpos += 5;
-				velX = 0;
-				velY = -0.5;
-				if (red.getComponent<PositionC>().ypos - 32 == map->wallsV[197].collider.y) {
-					velY = 0.5;
-				}
-			 }
-		else if (Collision::ATE(red.getComponent<Collider>().collider, map->wallsV[x].collider, 5) && velY == 0.5		//down ppx>epx
-				&& player.getComponent<PositionC>().xpos > red.getComponent<PositionC>().xpos) {
-				red.getComponent<PositionC>().collided();
-				red.getComponent<PositionC>().ypos += -5;
-				velX = 0.5;
-				velY = 0;
-			 }
-		else if (Collision::ATE(red.getComponent<Collider>().collider, map->wallsV[x].collider, 5) && velY == 0.5		//down ppx<epx
-				&& player.getComponent<PositionC>().xpos < red.getComponent<PositionC>().xpos) {
-				red.getComponent<PositionC>().collided();
-				red.getComponent<PositionC>().ypos += -5;
-				velX = -0.5;
-				velY = 0;
-			 }
-		else if (Collision::ATE(red.getComponent<Collider>().collider, map->wallsV[x].collider, 5) && velY == -0.5	//up ppx>epx
-				&& player.getComponent<PositionC>().xpos > red.getComponent<PositionC>().xpos) {
-				red.getComponent<PositionC>().collided();
-				red.getComponent<PositionC>().ypos += 5;
-				velX = 0.5;
-				velY = 0;
-			 }
-		else if (Collision::ATE(red.getComponent<Collider>().collider, map->wallsV[x].collider, 5) && velY == -0.5	//up ppx<epx
-				&& player.getComponent<PositionC>().xpos < red.getComponent<PositionC>().xpos) {
-				red.getComponent<PositionC>().collided();
-				red.getComponent<PositionC>().ypos += 5;
-				velX = -0.5;
-				velY = 0;
-			 }
-			//cout << x  << " " << map->wallsV[x].collider.x /32 << " " <<  map->wallsV[x].collider.y /32 << endl;
+	if (points >= 500) {
+		green.getComponent<Enemy>().engage();
+		green.getComponent<Enemy>().wandering = false;
 	}
+	if (points >= 1500) { 
+		blue.getComponent<Enemy>().engage(); 
+	blue.getComponent<Enemy>().wandering = false;
+	}
+	if (points >= 1900) { 
+		orange.getComponent<Enemy>().engage();
+		orange.getComponent<Enemy>().wandering = false;
+	}
+	red.getComponent<Enemy>().engage();
+	green.getComponent<Enemy>().wander(288,320);
+	blue.getComponent<Enemy>().wander(288, 320);
+	orange.getComponent<Enemy>().wander(288, 320);
+	red.getComponent<Enemy>().wander(288, 320);
 
-	for (int x = 0; x < map->intV.size(); x++) {
-		if (red.getComponent<Collider>().collider.x == map->intV[x].collider.x && red.getComponent<Collider>().collider.y == map->intV[x].collider.y) {
-			if (player.getComponent<PositionC>().xpos > red.getComponent<PositionC>().xpos
-				&& player.getComponent<PositionC>().ypos > red.getComponent<PositionC>().ypos) {
-				velX = 0.5;
-				velY = 0;
+		for (size_t x = 0; x < map->intV.size(); x++) {
+			red.getComponent<Enemy>().move(map->intV[x], pacman);
+			orange.getComponent<Enemy>().move(map->intV[x], pacman);
+			green.getComponent<Enemy>().randomMove(map->intV[x]);
+			if (points < 2000) {
+				blue.getComponent<Enemy>().randomMove(map->intV[x]);
 			}
-			else if (player.getComponent<PositionC>().xpos > red.getComponent<PositionC>().xpos
-				&& player.getComponent<PositionC>().ypos < red.getComponent<PositionC>().ypos) {
-				velX = -0.5;
-				velY = 0;
+			else blue.getComponent<Enemy>().move(map->intV[x], pacman);
+			if (points < 2200) {
+				orange.getComponent<Enemy>().randomMove(map->intV[x]);
 			}
-			else if (player.getComponent<PositionC>().ypos < red.getComponent<PositionC>().ypos
-				&& player.getComponent<PositionC>().ypos < red.getComponent<PositionC>().ypos) {
-				velX = 0;
-				velY = 0.5;
+			else orange.getComponent<Enemy>().move(map->intV[x], pacman);
+		}
+		for (size_t x = 0; x < map->wallsV.size(); x++) {
+			if (Collision::AABB(pacman.getComponent<Collider>().collider,
+				map->wallsV[x].collider)) {
+				pacman.getComponent<PositionC>().collided();
 			}
-			else if (player.getComponent<PositionC>().ypos < red.getComponent<PositionC>().ypos
-				&& player.getComponent<PositionC>().ypos > red.getComponent<PositionC>().ypos) {
-				velX = 0;
-				velY = -0.5;
+			red.getComponent<Enemy>().collide(map->wallsV[x], pacman);
+			green.getComponent<Enemy>().collide(map->wallsV[x], pacman);
+			orange.getComponent<Enemy>().collide(map->wallsV[x], pacman);
+			blue.getComponent<Enemy>().collide(map->wallsV[x], pacman);
+		}
+
+		red.getComponent<Enemy>().respawn();
+		green.getComponent<Enemy>().respawn();
+		orange.getComponent<Enemy>().respawn();
+		blue.getComponent<Enemy>().respawn();
+
+		if (pacman.getComponent<Player>().dead || points == 2360) {
+			red.getComponent<Enemy>().setVel(0,0);
+			green.getComponent<Enemy>().setVel(0, 0);
+			orange.getComponent<Enemy>().setVel(0, 0);
+			blue.getComponent<Enemy>().setVel(0, 0);
+			pacman.getComponent<PositionC>().velocity = 0;
+			finalScreen++;
+			if (finalScreen == 250) {
+				isRunning = false;
 			}
 		}
-	}
-
-
-	//Ghost::moveGhost(player.getComponent<PositionC>().xpos, player.getComponent<PositionC>().ypos,
-		//red.getComponent<PositionC>().xpos, red.getComponent<PositionC>().ypos);
-
-	//if (player.getComponent<PositionC>().xpos > red.getComponent<PositionC>().xpos) {
-	//	red.getComponent<PositionC>().xpos += 0.2;
-	//	//return true;
-	//}
-	//if (player.getComponent<PositionC>().xpos < red.getComponent<PositionC>().xpos) {
-	//	red.getComponent<PositionC>().xpos -= 0.2;
-	//	//return true;
-	//}
-	//if (player.getComponent<PositionC>().ypos > red.getComponent<PositionC>().ypos) {
-	//	red.getComponent<PositionC>().ypos += 0.2;
-	//	//return true;
-	//}
-	//if (player.getComponent<PositionC>().ypos < red.getComponent<PositionC>().ypos) {
-	//	red.getComponent<PositionC>().ypos -= 0.2;
-	//	//return true;
-	//}
-
 }
 
 void Game::render()
@@ -283,7 +202,16 @@ void Game::render()
 	SDL_RenderClear(renderer);
 	map->drawMap();
 	manager.draw();
-	//player->render();
+	Text showPoints("Assets/Emmett__.ttf", 20, "Points:" + point, { 255,255,255,255 });
+	showPoints.display(1, 0);
+	if (pacman.getComponent<Player>().dead) {
+		Text lose("Assets/babyk___.ttf", 100, "You Lose!" , { 255,0,0,255 });
+		lose.display(180, 200);
+	}
+	if (points == 2360) {
+		Text win("Assets/babyk___.ttf", 100, "You Win!", { 255,0,0,255 });
+		win.display(180, 200);
+	}
 	SDL_RenderPresent(renderer);
 }
 

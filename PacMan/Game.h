@@ -1,6 +1,7 @@
 #pragma once
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 #include <iostream>
 
 using namespace std;
@@ -10,6 +11,10 @@ class Game
 public:
 	Game();
 	~Game();
+
+	int points = 0;
+	string point;
+	int finalScreen = 0;
 
 	void init(const char* title, int xpos, int ypos, int width, int height, bool fullscreen);
 	static SDL_Texture*	loadTexture(const char* fileName);

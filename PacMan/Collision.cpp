@@ -9,8 +9,7 @@ bool Collision::AABB(const SDL_Rect& recA, const SDL_Rect& recB) {
 		recA.y + recA.h - 5 >= recB.y &&
 		recB.y + recB.h - 5 >= recA.y
 		)
-	{
-		std::cout << recA.x << recA.y << " hit: " << recB.x << recB.y << std::endl; return true;}
+	{return true;}
 
 	if (
 		recA.x <= 30 || recA.x + recA.w >= 770
@@ -22,18 +21,6 @@ bool Collision::AABB(const SDL_Rect& recA, const SDL_Rect& recB) {
 	return false;
 }
 
-bool Collision::AABB(const Collider& colA, const Collider& colB)
-{
-	if (AABB(colA.collider, colB.collider))
-	{
-		//std::cout << colA.tag << " hit: " << colB.tag << std::endl;
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
 
 bool Collision::ATE(const SDL_Rect& recA, const SDL_Rect& recB, int proximity) {
 	if (
@@ -43,9 +30,7 @@ bool Collision::ATE(const SDL_Rect& recA, const SDL_Rect& recB, int proximity) {
 		recB.y + recB.h - proximity >= recA.y
 		)
 	{
-		//std::cout << recA.x << recA.y << " hit: " << recB.x /32 << recB.y /32 << std::endl;
 		return true;
 	}
-
 	return false;
 }

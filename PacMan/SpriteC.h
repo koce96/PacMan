@@ -12,26 +12,34 @@ private:
 	bool animated = false;
 	int frames = 0;
 	int speed = 100;
+	const char* retPath;
+
 
 public:
 	SpriteC() = default;
-	SpriteC(const char* path) {
-		setTex(path);
+	SpriteC(const char* path, int nFrames) {
+		setTex(path,nFrames);
 	}
 
 	SpriteC(const char* path, int nFrames, int nSpeed) {
 		animated = true;
 		frames = nFrames;
 		speed = nSpeed;
-		setTex(path);
+		setTex(path,nFrames);
+		retPath = path;
 	}
 
 	~SpriteC() {
 		SDL_DestroyTexture(texture);
 	}
 	
-	void setTex(const char* path) {
+	void setTex(const char* path, int nFrames) {
 		texture = Game::loadTexture(path);
+		frames = nFrames;
+	}
+
+	const char* getTex() {
+		return retPath;
 	}
 
 	void init() override {
@@ -46,8 +54,6 @@ public:
 	void update() override {
 		if (animated) {
 			srcRect.x = srcRect.w * static_cast<int>((SDL_GetTicks() / speed) % frames);
-
-
 		}
 
 		destRect.x = position->x();

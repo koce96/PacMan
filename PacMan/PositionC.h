@@ -5,18 +5,17 @@
 class PositionC : public Component {
 private:
 
-
 public:
-	double xpos;		//MIND THE DOUBLES
-	double ypos;
-	double x() { return xpos; }
-	double y() { return ypos; }
+	int xpos;	
+	int ypos;
+	int x() { return xpos; }
+	int y() { return ypos; }
 	int direction;
-	double velocity;
+	int velocity;
 	int height = 32;
 	int width = 32;
 	int scale = 1;
-	double tempX, tempY;
+	int tempX, tempY;
 
 	PositionC() {
 		xpos = 0;
@@ -29,11 +28,11 @@ public:
 		scale = sc;
 	}
 
-	PositionC(double x, double y) {
+	PositionC(int x, int y) {
 		xpos = x;
 		ypos = y;
 	}
-	PositionC(double x, double y, int h, int w, int sc) {
+	PositionC(int x, int y, int h, int w, int sc) {
 		xpos = x;
 		ypos = y;
 		height = h;
@@ -44,9 +43,6 @@ public:
 	}
 
 	void init() override {
-		/*xpos = 0;
-		ypos = 0;*/
-		//velocity = 1;
 	}
 
 	void update() override {
@@ -66,31 +62,19 @@ public:
 			ypos = ypos;
 			xpos += velocity;
 		}
-		//xpos--;
-		//ypos--;
-		//cout << xpos << " " << ypos << endl;
-		//cout << velocity << endl;
-		velocity = 0.5;
+		velocity = 1;
 	}
 
 	void setPos(int x, int y) {
-		/*xpos = x;
-		ypos = y;*/
 	}
 
 	void x(double x) {
-	/*	xpos = x;*/
 	}
 
 	void y(double y) {
-	/*	ypos = y;*/
 	}
 
 	void collided() {
-		/*ypos = ypos * -1;
-		xpos = xpos * -1;*/
-		
-		//velocity = velocity * -1;
 		xpos = tempX;
 		ypos = tempY;
 	}
@@ -98,5 +82,4 @@ public:
 		tempX = xpos;
 		tempY = ypos;
 	}
-
 };
